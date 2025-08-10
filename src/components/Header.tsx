@@ -69,7 +69,6 @@ export function Header({ isDark, onThemeClick }: HeaderProps) {
             <NavLink to="/" end className={({ isActive }) => isActive ? linkActive : undefined}>{t('nav.home')}</NavLink>
             <NavLink to="/projects" className={({ isActive }) => isActive ? linkActive : undefined}>{t('nav.projects')}</NavLink>
             <NavLink to="/about" className={({ isActive }) => isActive ? linkActive : undefined}>{t('nav.about')}</NavLink>
-            <NavLink to="/blog" className={({ isActive }) => isActive ? linkActive : undefined}>{t('nav.blog')}</NavLink>
             <NavLink to="/contact" className={({ isActive }) => isActive ? linkActive : undefined}>{t('nav.contact')}</NavLink>
           </nav>
 
@@ -109,7 +108,6 @@ export function Header({ isDark, onThemeClick }: HeaderProps) {
             <NavLink to="/" end className={({ isActive }) => `${isActive ? linkActive : linkBase} py-2`} onClick={() => setIsMenuOpen(false)}>{t('nav.home')}</NavLink>
             <NavLink to="/projects" className={({ isActive }) => `${isActive ? linkActive : linkBase} py-2`} onClick={() => setIsMenuOpen(false)}>{t('nav.projects')}</NavLink>
             <NavLink to="/about" className={({ isActive }) => `${isActive ? linkActive : linkBase} py-2`} onClick={() => setIsMenuOpen(false)}>{t('nav.about')}</NavLink>
-            <NavLink to="/blog" className={({ isActive }) => `${isActive ? linkActive : linkBase} py-2`} onClick={() => setIsMenuOpen(false)}>{t('nav.blog')}</NavLink>
             <NavLink to="/contact" className={({ isActive }) => `${isActive ? linkActive : linkBase} py-2`} onClick={() => setIsMenuOpen(false)}>{t('nav.contact')}</NavLink>
           </nav>
           <div className={`flex items-center gap-3 mt-4 pt-4 border-t ${isDark ? 'border-zinc-700' : 'border-slate-200'}`}>
