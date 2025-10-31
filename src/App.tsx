@@ -7,6 +7,7 @@ import { HomePage } from "./pages/Home"
 import { ProjectsPage } from "./pages/Projects"
 import { AboutPage } from "./pages/About"
 import { ContactPage } from "./pages/Contact"
+import { ExamPage } from "./pages/Exam"
 
 export default function App() {
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
@@ -54,6 +55,7 @@ export default function App() {
               <Route path="/projects" element={<ProjectsPage isDark={isDark} onProjectOpen={setActive} />} />
               <Route path="/about" element={<AboutPage isDark={isDark} />} />
               <Route path="/contact" element={<ContactPage isDark={isDark} />} />
+              <Route path="/exam" element={<ExamPage isDark={isDark} />} />
             </Routes>
         </main>
         <Footer isDark={isDark} />
