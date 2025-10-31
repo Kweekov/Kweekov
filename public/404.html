@@ -1,20 +1,13 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <title>404</title>
-    <script>
-      // Fallback для истории навигации SPA
-      // Для кастомного домена base должен быть '/'
-      // Просто редиректим на index.html, React Router обработает путь
-      const path = window.location.pathname
-      if (path !== '/') {
-        sessionStorage.setItem('redirectPath', path + window.location.search + window.location.hash)
-        window.location.replace('/')
-      }
-    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Портфолио — Kweekov</title>
   </head>
   <body>
-    Redirecting...
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html> 

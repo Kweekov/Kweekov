@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import "./index.css"
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom"
 import { Container, Footer, Header, ProjectSlideOver, ThemePopover } from "./components"
 import type { Project, ThemeSettings } from "./types"
 import { HomePage } from "./pages/Home"
@@ -9,17 +9,30 @@ import { AboutPage } from "./pages/About"
 import { ContactPage } from "./pages/Contact"
 import { ExamPage } from "./pages/Exam"
 
-// Компонент для обработки редиректа из 404.html
+// Компонент для обработки путей при загрузке через 404.html
+// Когда GitHub Pages возвращает 404.html, URL уже содержит нужный путь
+// React Router должен автоматически обработать этот путь
 function RedirectHandler() {
   const navigate = useNavigate()
+  const location = useLocation()
   
   useEffect(() => {
-    const redirectPath = sessionStorage.getItem('redirectPath')
-    if (redirectPath) {
-      sessionStorage.removeItem('redirectPath')
-      navigate(redirectPath, { replace: true })
+    // Проверяем текущий путь
+    const currentPath = location.pathname
+    const validRoutes = ['/', '/projects', '/about', '/contact', '/exam']
+    
+    // Если путь валидный, React Router уже обработает его автоматически
+    // Если путь не валидный, перенаправляем на главную
+    if (currentPath && !validRoutes.includes(currentPath)) {
+      navigate('/', { replace: true })
     }
-  }, [navigate])
+    
+    // Очищаем старый redirectPath из sessionStorage, если есть
+    const savedPath = sessionStorage.getItem('redirectPath')
+    if (savedPath) {
+      sessionStorage.removeItem('redirectPath')
+    }
+  }, [navigate, location])
   
   return null
 }
@@ -59,9 +72,10 @@ export default function App() {
 
   const isDark = themeSettings.isDarkMode
 
-  // Нормализуем BASE_URL для кастомного домена
+  // Для кастомного домена kweekov.ru base должен быть '/'
+  // Если BASE_URL содержит '/Kweekov/', нормализуем его
   const basePath = import.meta.env.BASE_URL || '/'
-  const normalizedBase = basePath === '/Kweekov/' ? '/' : basePath
+  const normalizedBase = basePath.replace(/\/Kweekov\/?/, '/') || '/'
 
   return (
     <BrowserRouter basename={normalizedBase}>
