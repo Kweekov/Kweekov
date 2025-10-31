@@ -9,28 +9,32 @@ import { AboutPage } from "./pages/About"
 import { ContactPage } from "./pages/Contact"
 import { ExamPage } from "./pages/Exam"
 
-// Компонент для обработки путей при загрузке через 404.html
-// Когда GitHub Pages возвращает 404.html, URL уже содержит нужный путь
-// React Router должен автоматически обработать этот путь
+// Компонент для обработки редиректа из 404.html
+// Когда GitHub Pages возвращает 404.html, он редиректит на '/' с сохранением пути в sessionStorage
+// Этот компонент восстанавливает правильный путь через React Router
 function RedirectHandler() {
   const navigate = useNavigate()
   const location = useLocation()
   
   useEffect(() => {
-    // Проверяем текущий путь
-    const currentPath = location.pathname
-    const validRoutes = ['/', '/projects', '/about', '/contact', '/exam']
-    
-    // Если путь валидный, React Router уже обработает его автоматически
-    // Если путь не валидный, перенаправляем на главную
-    if (currentPath && !validRoutes.includes(currentPath)) {
-      navigate('/', { replace: true })
-    }
-    
-    // Очищаем старый redirectPath из sessionStorage, если есть
+    // Проверяем, есть ли сохраненный путь из 404.html
     const savedPath = sessionStorage.getItem('redirectPath')
     if (savedPath) {
       sessionStorage.removeItem('redirectPath')
+      // Если мы на корневой странице, но есть сохраненный путь - перенаправляем
+      if (location.pathname === '/' && savedPath !== '/') {
+        navigate(savedPath, { replace: true })
+        return
+      }
+    }
+    
+    // Проверяем текущий путь на валидность
+    const currentPath = location.pathname
+    const validRoutes = ['/', '/projects', '/about', '/contact', '/exam']
+    
+    // Если путь не валидный, перенаправляем на главную
+    if (currentPath && !validRoutes.includes(currentPath)) {
+      navigate('/', { replace: true })
     }
   }, [navigate, location])
   

@@ -5,9 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Портфолио — Kweekov</title>
+    <script>
+      // Сохраняем текущий путь для React Router
+      const path = window.location.pathname + window.location.search + window.location.hash
+      if (path !== '/') {
+        sessionStorage.setItem('redirectPath', path)
+      }
+      // Редиректим на корень, чтобы загрузить index.html с правильными путями к скриптам
+      window.location.replace('/')
+    </script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    Redirecting...
   </body>
 </html> 
