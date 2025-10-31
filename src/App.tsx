@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import "./index.css"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom"
 import { Container, Footer, Header, ProjectSlideOver, ThemePopover } from "./components"
 import type { Project, ThemeSettings } from "./types"
 import { HomePage } from "./pages/Home"
@@ -8,6 +8,21 @@ import { ProjectsPage } from "./pages/Projects"
 import { AboutPage } from "./pages/About"
 import { ContactPage } from "./pages/Contact"
 import { ExamPage } from "./pages/Exam"
+
+// Компонент для обработки редиректа из 404.html
+function RedirectHandler() {
+  const navigate = useNavigate()
+  
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('redirectPath')
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectPath')
+      navigate(redirectPath, { replace: true })
+    }
+  }, [navigate])
+  
+  return null
+}
 
 export default function App() {
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(() => {
@@ -44,8 +59,13 @@ export default function App() {
 
   const isDark = themeSettings.isDarkMode
 
+  // Нормализуем BASE_URL для кастомного домена
+  const basePath = import.meta.env.BASE_URL || '/'
+  const normalizedBase = basePath === '/Kweekov/' ? '/' : basePath
+
   return (
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename={normalizedBase}>
+      <RedirectHandler />
       <div className={`${isDark ? "bg-zinc-900 text-zinc-100" : "bg-white text-slate-900"} min-h-screen transition-colors duration-500 antialiased`}>
         <Container>
           <Header isDark={isDark} onThemeClick={handleOpenTheme} />

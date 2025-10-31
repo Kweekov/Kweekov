@@ -3,12 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <title>404</title>
-    <meta http-equiv="refresh" content="0; url=/Kweekov/" />
     <script>
       // Fallback для истории навигации SPA
-      const base = '/Kweekov/'
-      const redirect = base + (location.pathname.replace(base, '') + location.search + location.hash)
-      window.location.replace(redirect)
+      // Для кастомного домена base должен быть '/'
+      // Просто редиректим на index.html, React Router обработает путь
+      const path = window.location.pathname
+      if (path !== '/') {
+        sessionStorage.setItem('redirectPath', path + window.location.search + window.location.hash)
+        window.location.replace('/')
+      }
     </script>
   </head>
   <body>

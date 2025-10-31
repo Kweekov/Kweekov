@@ -1,0 +1,205 @@
+СХЕМА СЕТИ:
+
+ISP (172.16.1.14/28, 172.16.2.14/28)
+    |
+HQ-RTR (172.16.1.1/28) -- HQ-SRV (192.168.1.2/27)
+    |-- VLAN10: 192.168.1.1/27 (управление)
+    |-- VLAN20: 192.168.2.1/28 (DHCP) 
+    |-- VLAN99: 192.168.3.1/29 (управление)
+    |
+BR-RTR (172.16.2.1/28) -- BR-SRV (192.168.4.2/28)
+1. НАСТРОЙКА ISP
+
+# Устанавливаем hostname
+hostnamectl set-hostname isp; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Настраиваем интерфейсы
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens18/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens18/options
+echo '172.16.1.14/28' > /etc/net/ifaces/ens18/ipv4address
+
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens19/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens19/options
+echo '172.16.2.14/28' > /etc/net/ifaces/ens19/ipv4address
+
+# Перезапускаем сеть
+systemctl restart network
+
+# Обновляем и устанавливаем пакеты
+apt-get update
+apt-get install nano nftables -y
+
+# Настраиваем nftables
+vim /etc/nftables/nftables.nft
+# ДОБАВИТЬ:
+table inet nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat;
+        oifname "ens19" masquerade
+    }
+}
+
+systemctl enable --now nftables
+systemctl status nftables
+2. НАСТРОЙКА HQ-RTR
+
+# Устанавливаем hostname
+hostnamectl set-hostname hq-rtr; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Добавляем DNS
+echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
+
+# Настраиваем интерфейсы
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens18/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens18/options
+echo '172.16.1.1/28' > /etc/net/ifaces/ens18/ipv4address
+echo 'default via 172.16.1.14' > /etc/net/ifaces/ens18/ipv4route
+
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens19/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens19/options
+echo '192.168.1.1/27' > /etc/net/ifaces/ens19/ipv4address
+
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens20/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens20/options
+echo '192.168.2.1/28' > /etc/net/ifaces/ens20/ipv4address
+
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens21/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens21/options
+echo '192.168.3.1/29' > /etc/net/ifaces/ens21/ipv4address
+
+# Перезапускаем сеть
+systemctl restart network
+
+# Проверяем интернет
+apt-get update
+
+# Устанавливаем пакеты
+apt-get install nano nftables sudo dhcp-server NetworkManager-ovs frr -y
+
+# Настраиваем nftables
+vim /etc/nftables/nftables.nft
+# ДОБАВИТЬ:
+table inet nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat;
+        oifname "ens18" masquerade
+    }
+}
+
+systemctl enable --now nftables
+systemctl status nftables
+3. НАСТРОЙКА BR-RTR
+
+# Устанавливаем hostname
+hostnamectl set-hostname br-rtr; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Добавляем DNS
+echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
+
+# Настраиваем интерфейсы
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens18/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens18/options
+echo '172.16.2.1/28' > /etc/net/ifaces/ens18/ipv4address
+echo 'default via 172.16.2.14' > /etc/net/ifaces/ens18/ipv4route
+
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens19/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens19/options
+echo '192.168.4.1/28' > /etc/net/ifaces/ens19/ipv4address
+
+# Перезапускаем сеть
+systemctl restart network
+
+# Проверяем интернет
+apt-get update
+
+# Устанавливаем пакеты
+apt-get install nano nftables sudo frr -y
+
+# Настраиваем nftables
+vim /etc/nftables/nftables.nft
+# ДОБАВИТЬ:
+table inet nat {
+    chain postrouting {
+        type nat hook postrouting priority srcnat;
+        oifname "ens18" masquerade
+    }
+}
+
+systemctl enable --now nftables
+systemctl status nftables
+4. НАСТРОЙКА HQ-SRV
+
+# Устанавливаем hostname
+hostnamectl set-hostname hq-srv; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Добавляем DNS
+echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
+
+# Настраиваем интерфейсы
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens18/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens18/options
+echo '192.168.1.2/27' > /etc/net/ifaces/ens18/ipv4address
+echo 'default via 192.168.1.1' > /etc/net/ifaces/ens18/ipv4route
+
+# Перезапускаем сеть
+systemctl restart network
+
+# Проверяем интернет
+apt-get update
+
+# Устанавливаем пакеты
+apt-get install nano bind -y
+5. НАСТРОЙКА BR-SRV
+
+# Устанавливаем hostname
+hostnamectl set-hostname br-srv; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Добавляем DNS
+echo 'nameserver 8.8.8.8' >> /etc/resolv.conf
+
+# Настраиваем интерфейсы
+cp /etc/net/ifaces/default/options /etc/net/ifaces/ens18/
+echo 'TYPE=eth' >> /etc/net/ifaces/ens18/options
+echo '192.168.4.2/28' > /etc/net/ifaces/ens18/ipv4address
+echo 'default via 192.168.4.1' > /etc/net/ifaces/ens18/ipv4route
+
+# Перезапускаем сеть
+systemctl restart network
+
+# Проверяем интернет
+apt-get update
+
+# Устанавливаем пакеты
+apt-get install nano -y
+6. НАСТРОЙКА HQ-CLI
+
+# Устанавливаем hostname
+hostnamectl set-hostname hq-cli.aks42.aks; exec bash
+
+# Включаем IP forward
+vim /etc/net/sysctl.conf
+# Изменить: net.ipv4.ip_forward = 0 на net.ipv4.ip_forward = 1
+
+# Настраиваем время
+timedatectl set-timezone Europe/Moscow
+timedatectl

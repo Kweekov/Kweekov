@@ -6,15 +6,20 @@ const FACT_URL = 'https://uselessfacts.jsph.pl/random.json?language=ru'
 
 export async function fetchWeather(): Promise<WeatherData | null> {
   try {
-    const response = await fetch(WEATHER_URL)
-    const data = await response.json()
-    if (!data.current_weather) return null
+    const [moscowResponse] = await Promise.all([
+      fetch(WEATHER_URL),
+    ])
+    
+    const moscowData = await moscowResponse.json()
+    
+    if (!moscowData.current_weather) return null
+    
     return {
       location: "Москва",
-      temp: Math.round(data.current_weather.temperature),
-      description: getWeatherDescription(data.current_weather.weathercode),
-      humidity: data.hourly?.relative_humidity_2m?.[0] ?? 0,
-      icon: getWeatherIcon(data.current_weather.weathercode)
+      temp: Math.round(moscowData.current_weather.temperature),
+      description: getWeatherDescription(moscowData.current_weather.weathercode),
+      humidity: moscowData.hourly?.relative_humidity_2m?.[0] ?? 0,
+      icon: getWeatherIcon(moscowData.current_weather.weathercode),
     }
   } catch {
     return null
