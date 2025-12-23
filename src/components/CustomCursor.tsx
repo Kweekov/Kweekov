@@ -1,7 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 
+function isTouchDevice() {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function CustomCursor() {
+  const [isMobile] = useState(() => isTouchDevice())
+
   const x = useMotionValue(-100)
   const y = useMotionValue(-100)
 
@@ -18,6 +24,8 @@ export function CustomCursor() {
   const scrollTimeout = useRef<number | null>(null)
 
   useEffect(() => {
+    if (isMobile) return
+
     const move = (e: MouseEvent) => {
       x.set(e.clientX)
       y.set(e.clientY)
@@ -61,7 +69,11 @@ export function CustomCursor() {
       document.removeEventListener('scroll', scroll, true)
       document.body.style.cursor = ''
     }
-  }, [x, y])
+  }, [x, y, isMobile])
+
+  if (isMobile) {
+    return null
+  }
 
   return (
     <>

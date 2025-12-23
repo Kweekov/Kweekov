@@ -105,6 +105,27 @@ export function Skills() {
     container.scrollLeft = scrollLeft - walk
   }
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!scrollContainerRef.current) return
+    setIsDragging(true)
+    const container = scrollContainerRef.current
+    setStartX(e.touches[0].pageX - container.getBoundingClientRect().left)
+    setScrollLeft(container.scrollLeft)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return
+    e.preventDefault()
+    const container = scrollContainerRef.current
+    const x = e.touches[0].pageX - container.getBoundingClientRect().left
+    const walk = (x - startX) * 2
+    container.scrollLeft = scrollLeft - walk
+  }
+
+  const handleTouchEnd = () => {
+    setIsDragging(false)
+  }
+
   return (
     <section
       id="skills"
@@ -135,12 +156,20 @@ export function Skills() {
         <div
           ref={scrollContainerRef}
           data-draggable
-          className="overflow-x-auto py-4 scrollbar-hide cursor-grab mx-2 sm:mx-4 px-2 sm:px-4"
-          style={{ scrollBehavior: 'smooth', WebkitOverflowScrolling: 'touch' }}
+          className="overflow-x-auto py-4 scrollbar-hide cursor-grab mx-2 sm:mx-4 px-2 sm:px-4 touch-pan-x"
+          style={{ 
+            scrollBehavior: 'smooth', 
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+            scrollSnapType: 'x mandatory'
+          }}
           onMouseDown={handleMouseDown}
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <motion.div
             className="inline-grid grid-cols-10 gap-6"
