@@ -44,11 +44,16 @@ const skillDescriptions: Record<string, string> = {
   'Markdown': 'Документирование проектов и создание структурированного контента',
 }
 
+function isTouchDevice() {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0
+}
+
 export function Skills() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [startX, setStartX] = useState(0)
   const [scrollLeft, setScrollLeft] = useState(0)
+  const [isMobile] = useState(() => isTouchDevice())
 
   const columns = 10
   const rows = 2
@@ -71,7 +76,7 @@ export function Skills() {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollContainerRef.current) return
+    if (isMobile || !scrollContainerRef.current) return
     setIsDragging(true)
     const container = scrollContainerRef.current
     setStartX(e.pageX - container.getBoundingClientRect().left)
@@ -81,6 +86,7 @@ export function Skills() {
   }
 
   const handleMouseLeave = () => {
+    if (isMobile) return
     setIsDragging(false)
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grab'
@@ -89,6 +95,7 @@ export function Skills() {
   }
 
   const handleMouseUp = () => {
+    if (isMobile) return
     setIsDragging(false)
     if (scrollContainerRef.current) {
       scrollContainerRef.current.style.cursor = 'grab'
@@ -97,33 +104,12 @@ export function Skills() {
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return
+    if (isMobile || !isDragging || !scrollContainerRef.current) return
     e.preventDefault()
     const container = scrollContainerRef.current
     const x = e.pageX - container.getBoundingClientRect().left
     const walk = (x - startX) * 2
     container.scrollLeft = scrollLeft - walk
-  }
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!scrollContainerRef.current) return
-    setIsDragging(true)
-    const container = scrollContainerRef.current
-    setStartX(e.touches[0].pageX - container.getBoundingClientRect().left)
-    setScrollLeft(container.scrollLeft)
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !scrollContainerRef.current) return
-    e.preventDefault()
-    const container = scrollContainerRef.current
-    const x = e.touches[0].pageX - container.getBoundingClientRect().left
-    const walk = (x - startX) * 2
-    container.scrollLeft = scrollLeft - walk
-  }
-
-  const handleTouchEnd = () => {
-    setIsDragging(false)
   }
 
   return (
@@ -156,20 +142,18 @@ export function Skills() {
         <div
           ref={scrollContainerRef}
           data-draggable
-          className="overflow-x-auto py-4 scrollbar-hide cursor-grab mx-2 sm:mx-4 px-2 sm:px-4 touch-pan-x"
+          className={`overflow-x-auto py-4 scrollbar-hide mx-2 sm:mx-4 px-2 sm:px-4 ${
+            isMobile ? '' : 'cursor-grab'
+          }`}
           style={{ 
             scrollBehavior: 'smooth', 
             WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
-            scrollSnapType: 'x mandatory'
+            overscrollBehaviorX: 'contain'
           }}
           onMouseDown={handleMouseDown}
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           <motion.div
             className="inline-grid grid-cols-10 gap-6"
