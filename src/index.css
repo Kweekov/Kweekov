@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased bg-white;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    cursor: none;
+  }
+
+  * {
+    @apply border-neutral-200;
+    cursor: none !important;
+  }
+
+  a, button, [role="button"], input, textarea, select {
+    cursor: none !important;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
