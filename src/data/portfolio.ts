@@ -38,6 +38,7 @@ export const cases: Case[] = [
       { name: 'api.ravir.store', url: 'https://api.ravir.store', status: 'completed' },
       { name: 'world.ravir.store', url: 'https://world.ravir.store', status: 'completed' },
       { name: 'ravir.productions', url: 'https://ravir.productions', status: 'completed' },
+      { name: 'Ravir Telegram Mini App', url: 'https://t.me/RavirStore_bot', status: 'completed' },
       { name: 'ravir.delivery', url: 'https://ravir.delivery', status: 'development' },
       { name: 'api.ravir.delivery', url: 'https://api.ravir.delivery', status: 'development' },
       { name: 'courier.ravir.store', url: 'https://courier.ravir.store', status: 'development' },
