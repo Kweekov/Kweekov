@@ -51,16 +51,22 @@ function isTouchDevice() {
 export function Skills() {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [scrollLeft, setScrollLeft] = useState(0)
+  const dragStateRef = useRef({
+    startX: 0,
+    startScrollLeft: 0,
+    lastX: 0,
+    velocity: 0,
+    lastTime: 0,
+    animationFrame: null as number | null,
+  })
   const [isMobile] = useState(() => isTouchDevice())
 
   const columns = 10
   const rows = 2
   const totalCells = columns * rows
-
+  
   const cells: (typeof skills[0] | null)[] = Array(totalCells).fill(null)
-
+  
   const skillPositions = [0, 1, 3, 4, 5, 7, 8, 10, 11, 12, 13, 15, 16, 17, 18, 19]
   
   skills.forEach((skill, index) => {
@@ -75,41 +81,105 @@ export function Skills() {
     columnsData.push([cells[i * rows], cells[i * rows + 1]])
   }
 
+  const updateScroll = useRef((currentX: number) => {
+    if (!scrollContainerRef.current) return
+    
+    const container = scrollContainerRef.current
+    const deltaX = dragStateRef.current.startX - currentX
+    const newScrollLeft = dragStateRef.current.startScrollLeft + deltaX
+    
+    container.scrollLeft = newScrollLeft
+  })
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isMobile || !scrollContainerRef.current) return
-    setIsDragging(true)
+    
     const container = scrollContainerRef.current
-    setStartX(e.pageX - container.getBoundingClientRect().left)
-    setScrollLeft(container.scrollLeft)
+    
+    dragStateRef.current = {
+      startX: e.clientX,
+      startScrollLeft: container.scrollLeft,
+      lastX: e.clientX,
+      velocity: 0,
+      lastTime: performance.now(),
+      animationFrame: null,
+    }
+    
+    setIsDragging(true)
     container.style.cursor = 'grabbing'
     container.style.userSelect = 'none'
-  }
-
-  const handleMouseLeave = () => {
-    if (isMobile) return
-    setIsDragging(false)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.style.cursor = 'grab'
-      scrollContainerRef.current.style.userSelect = ''
-    }
-  }
-
-  const handleMouseUp = () => {
-    if (isMobile) return
-    setIsDragging(false)
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.style.cursor = 'grab'
-      scrollContainerRef.current.style.userSelect = ''
-    }
+    container.style.scrollBehavior = 'auto'
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isMobile || !isDragging || !scrollContainerRef.current) return
+    
     e.preventDefault()
-    const container = scrollContainerRef.current
-    const x = e.pageX - container.getBoundingClientRect().left
-    const walk = (x - startX) * 2
-    container.scrollLeft = scrollLeft - walk
+    
+    const currentTime = performance.now()
+    const currentX = e.clientX
+    const deltaX = currentX - dragStateRef.current.lastX
+    const deltaTime = currentTime - dragStateRef.current.lastTime
+    
+    if (deltaTime > 0) {
+      dragStateRef.current.velocity = deltaX / deltaTime
+    }
+    
+    dragStateRef.current.lastX = currentX
+    dragStateRef.current.lastTime = currentTime
+    
+    updateScroll.current(currentX)
+  }
+
+  const handleMouseUp = () => {
+    if (isMobile || !isDragging) return
+    
+    if (dragStateRef.current.animationFrame !== null) {
+      cancelAnimationFrame(dragStateRef.current.animationFrame)
+      dragStateRef.current.animationFrame = null
+    }
+    
+    setIsDragging(false)
+    
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current
+      container.style.cursor = 'grab'
+      container.style.userSelect = ''
+      
+      const velocity = dragStateRef.current.velocity
+      
+      if (Math.abs(velocity) > 0.1) {
+        let currentVelocity = -velocity * 10
+        const friction = 0.95
+        let lastTime = performance.now()
+        
+        const animate = () => {
+          const currentTime = performance.now()
+          const deltaTime = Math.min((currentTime - lastTime) / 16, 2)
+          lastTime = currentTime
+          
+          if (Math.abs(currentVelocity) < 0.5) {
+            return
+          }
+          
+          container.scrollLeft += currentVelocity * deltaTime
+          currentVelocity *= Math.pow(friction, deltaTime)
+          
+          if (Math.abs(currentVelocity) >= 0.5) {
+            dragStateRef.current.animationFrame = requestAnimationFrame(animate)
+          } else {
+            dragStateRef.current.animationFrame = null
+          }
+        }
+        
+        dragStateRef.current.animationFrame = requestAnimationFrame(animate)
+      }
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (isMobile) return
+    handleMouseUp()
   }
 
   return (
@@ -146,7 +216,7 @@ export function Skills() {
             isMobile ? '' : 'cursor-grab'
           }`}
           style={{ 
-            scrollBehavior: 'smooth', 
+            scrollBehavior: 'auto',
             WebkitOverflowScrolling: 'touch',
             overscrollBehaviorX: 'contain'
           }}

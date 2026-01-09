@@ -130,9 +130,12 @@ export function Footer() {
       </div>
 
       <motion.button
-        className={`fixed bottom-8 right-8 z-40 w-12 h-12 bg-neutral-900 text-white rounded-full shadow-lg flex items-center justify-center border border-neutral-800 hover:bg-neutral-800 transition-colors ${
-          isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        className={`fixed bottom-8 right-8 z-40 w-12 h-12 rounded-full flex items-center justify-center mix-blend-difference pointer-events-auto ${
+          isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
+        style={{
+          backgroundColor: '#ffffff'
+        }}
         onClick={scrollToTop}
         initial={{ scale: 0 }}
         animate={{ scale: isVisible ? 1 : 0 }}
@@ -144,14 +147,14 @@ export function Footer() {
         <svg
           className="w-5 h-5"
           fill="none"
-          stroke="currentColor"
+          stroke="#000000"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2}
+            strokeWidth={2.5}
             d="M5 10l7-7m0 0l7 7m-7-7v18"
           />
         </svg>

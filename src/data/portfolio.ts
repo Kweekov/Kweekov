@@ -56,10 +56,10 @@ export const cases: Case[] = [
   {
     title: 'Cashercollection.com',
     url: 'https://cashercollection.com',
-    status: 'discussion',
+    status: 'development',
     projects: [
-      { name: 'Cashercollection.com', url: 'https://cashercollection.com', status: 'discussion' },
-      { name: 'api.cashercollection.com', url: 'https://api.cashercollection.com', status: 'discussion' },
+      { name: 'Cashercollection.com', url: 'https://cashercollection.com', status: 'development' },
+      { name: 'api.cashercollection.com', url: 'https://api.cashercollection.com', status: 'development' },
     ],
   },
 ]
